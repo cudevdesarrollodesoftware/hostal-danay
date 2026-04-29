@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://hostaldanay.cu/</loc>
+    <lastmod>2026-04-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://hostaldanay.cu/assets/patio-beach.jpg</image:loc>
+      <image:caption>Patio del Hostal Danay con acceso directo a la playa en Playa Larga, Matanzas, Cuba</image:caption>
+      <image:title>Hostal Danay en Playa Larga</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://hostaldanay.cu/android-chrome-512x512.png</image:loc>
+      <image:caption>Logo de Hostal Danay</image:caption>
+      <image:title>Logo Hostal Danay</image:title>
+    </image:image>
+  </url>
+</urlset>
