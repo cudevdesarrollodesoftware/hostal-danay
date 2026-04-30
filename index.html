@@ -41,8 +41,8 @@
   <meta property="og:title" content="Hostal Danay · Lujo Descalzo en Playa Larga, Cuba" />
   <meta property="og:description" content="Casa de lujo a 15 metros del Caribe en Playa Larga, Matanzas. Patio de arena, acceso directo al mar, energia solar y experiencias autenticas en Cuba." />
   <meta property="og:url" content="https://hostaldanay.cu/" />
-  <meta property="og:image" content="https://images.unsplash.com/photo-1582610116397-edb318620f90?auto=format&fit=crop&w=1200&h=630&q=80" />
-  <meta property="og:image:secure_url" content="https://images.unsplash.com/photo-1582610116397-edb318620f90?auto=format&fit=crop&w=1200&h=630&q=80" />
+  <meta property="og:image" content="https://hostaldanay.cu/assets/patio-beach.jpg" />
+  <meta property="og:image:secure_url" content="https://hostaldanay.cu/assets/patio-beach.jpg" />
   <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -52,7 +52,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Hostal Danay · Lujo Descalzo en Playa Larga, Cuba" />
   <meta name="twitter:description" content="Alojamiento frente al mar en Playa Larga, Matanzas. A solo 15 metros del Caribe, con patio de arena, gastronomia local y reservas directas." />
-  <meta name="twitter:image" content="https://images.unsplash.com/photo-1582610116397-edb318620f90?auto=format&fit=crop&w=1200&h=630&q=80" />
+  <meta name="twitter:image" content="https://hostaldanay.cu/assets/patio-beach.jpg" />
   <meta name="twitter:image:alt" content="Hostal Danay frente al mar en Playa Larga, Cuba" />
 
   <script type="application/ld+json">
@@ -63,7 +63,7 @@
       "name": "Hostal Danay",
       "url": "https://hostaldanay.cu/",
       "description": "Hostal de lujo en Playa Larga, Matanzas, Cuba, a solo 15 metros del Caribe, con acceso directo al mar, patio de arena, energia solar y gastronomia local.",
-      "image": "https://images.unsplash.com/photo-1582610116397-edb318620f90?auto=format&fit=crop&w=1200&h=630&q=80",
+      "image": "https://hostaldanay.cu/assets/patio-beach.jpg",
       "email": "hostaldanays@gmail.com",
       "telephone": "+53 5 3697410",
       "priceRange": "$$",
@@ -949,6 +949,8 @@
           </div>
         </div>
 
+        <div id="booking-error" class="hidden mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert"></div>
+
         <div class="mb-6">
           <label class="block text-xs font-semibold uppercase tracking-wider text-forest/60 mb-2">
             <span data-lang="es">Mensaje (opcional)</span>
@@ -1108,11 +1110,85 @@
     document.getElementById('mobile-menu').classList.remove('open');
   }
 
+  /* ── Booking form validation ───────────────────────────── */
+  const bookingForm = document.getElementById('booking-form');
+  const guestsSelect = document.querySelector('select[name="personas"]');
+  const roomSelect = document.querySelector('select[name="habitacion"]');
+  const checkInInput = document.querySelector('input[name="llegada"]');
+  const checkOutInput = document.querySelector('input[name="salida"]');
+  const bookingError = document.getElementById('booking-error');
+
+  function bookingMessage(key) {
+    const lang = document.documentElement.lang || 'es';
+    const messages = {
+      capacity: {
+        es: 'Cada habitación admite un máximo de 4 personas. Para 5 a 8 personas, selecciona ambas habitaciones.',
+        en: 'Each room allows a maximum of 4 guests. For 5 to 8 guests, please select both rooms.'
+      },
+      dates: {
+        es: 'La fecha de salida debe ser posterior a la fecha de llegada.',
+        en: 'Check-out date must be after check-in date.'
+      }
+    };
+    return messages[key][lang] || messages[key].es;
+  }
+
+  function showBookingError(message, showError) {
+    if (!bookingError) return;
+    bookingError.textContent = message || '';
+    bookingError.classList.toggle('hidden', !showError || !message);
+  }
+
+  function validateBooking(showError) {
+    if (!guestsSelect || !roomSelect || !checkInInput || !checkOutInput) return true;
+
+    const guests = parseInt(guestsSelect.value, 10) || 0;
+    const room = roomSelect.value;
+    const singleRoomOptions = roomSelect.querySelectorAll('option[value="A"], option[value="B"]');
+    const needsBothRooms = guests > 4;
+
+    singleRoomOptions.forEach(function(option) {
+      option.disabled = needsBothRooms;
+    });
+
+    if (needsBothRooms && (room === 'A' || room === 'B')) {
+      roomSelect.value = '';
+    }
+
+    const capacityInvalid = needsBothRooms && roomSelect.value !== 'AB';
+    const datesInvalid = checkInInput.value && checkOutInput.value && checkOutInput.value <= checkInInput.value;
+    const message = capacityInvalid ? bookingMessage('capacity') : (datesInvalid ? bookingMessage('dates') : '');
+
+    roomSelect.setCustomValidity(capacityInvalid ? bookingMessage('capacity') : '');
+    checkOutInput.setCustomValidity(datesInvalid ? bookingMessage('dates') : '');
+    showBookingError(message, showError && Boolean(message));
+
+    return !message;
+  }
+
+  [guestsSelect, roomSelect, checkInInput, checkOutInput].forEach(function(field) {
+    if (!field) return;
+    field.addEventListener('change', function() {
+      validateBooking(Boolean(bookingError && !bookingError.classList.contains('hidden')));
+    });
+  });
+
+  if (bookingForm) {
+    bookingForm.addEventListener('submit', function(event) {
+      if (!validateBooking(true)) {
+        event.preventDefault();
+        if (roomSelect && roomSelect.validationMessage) roomSelect.reportValidity();
+        else if (checkOutInput && checkOutInput.validationMessage) checkOutInput.reportValidity();
+      }
+    });
+  }
+
   /* ── Textarea placeholder i18n on load ─────────────────── */
   document.addEventListener('DOMContentLoaded', function() {
     const lang = document.documentElement.lang || 'es';
     const ta = document.querySelector('textarea[name="mensaje"]');
     if (ta) ta.placeholder = ta.getAttribute('placeholder-' + lang) || '';
+    validateBooking(false);
   });
 </script>
 
